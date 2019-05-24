@@ -8222,12 +8222,14 @@ gui_mch_register_sign(char_u *signfile)
 		    gui.char_width * 2, gui.char_height,
 		    LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 #ifdef FEAT_XPM_W32
+#ifdef REMOVE
 	if (!STRICMP(ext, ".xpm"))
 	{
 	    sign.uType = IMAGE_XPM;
 	    LoadXpmImage((char *)signfile, (HBITMAP *)&sign.hImage,
 		    (HBITMAP *)&sign.hShape);
 	}
+#endif
 #endif
     }
 

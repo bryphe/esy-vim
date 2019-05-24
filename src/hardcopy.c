@@ -14,6 +14,9 @@
 #include "vim.h"
 #include "version.h"
 
+/* bryphe */
+#undef FEAT_PRINTER
+
 #if defined(FEAT_PRINTER) || defined(PROTO)
 /*
  * To implement printing on a platform, the following functions must be

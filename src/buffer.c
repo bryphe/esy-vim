@@ -1880,11 +1880,13 @@ buflist_new(
     stat_T	st;
 #endif
 
+    printf("1\n");
     if (top_file_num == 1)
 	hash_init(&buf_hashtab);
 
     fname_expand(curbuf, &ffname, &sfname);	// will allocate ffname
 
+    printf("2\n");
     /*
      * If file name already exists in the list, update the entry.
      */
@@ -1927,6 +1929,7 @@ buflist_new(
 	return buf;
     }
 
+    printf("3\n");
     /*
      * If the current buffer has no name and no contents, use the current
      * buffer.	Otherwise: Need to allocate a new buffer structure.

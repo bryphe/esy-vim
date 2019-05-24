@@ -429,6 +429,8 @@ changed_common(
     linenr_T	lnume,
     long	xtra)
 {
+
+    printf("CHANGED: %d | %d\n", lnum, col);
     win_T	*wp;
     tabpage_T	*tp;
     int		i;

@@ -21,6 +21,8 @@
 
 #include "xpm.h"
 
+#ifdef REMOVE
+
 /*
  * Tries to load an Xpm image from the file "filename".
  * Returns -1 on failure.
@@ -54,3 +56,4 @@ LoadXpmImage(
     *hShape = shp->bitmap;
     return 0;
 }
+#endif

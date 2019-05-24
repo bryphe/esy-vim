@@ -31,6 +31,9 @@
 # include <direct.h>
 #endif
 
+/* bryphe */
+#undef FEAT_PRINTER;
+
 #ifndef PROTO
 # if defined(FEAT_TITLE) && !defined(FEAT_GUI_MSWIN)
 #  include <shellapi.h>

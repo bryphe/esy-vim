@@ -50,6 +50,9 @@
 #define OPT_BUF(x)  (idopt_T)(PV_BUF + (int)(x))
 #define OPT_BOTH(x) (idopt_T)(PV_BOTH + (int)(x))
 
+/* bryphe */
+#undef FEAT_PRINTER
+
 /*
  * Definition of the PV_ values for buffer-local options.
  * The BV_ values are defined in option.h.

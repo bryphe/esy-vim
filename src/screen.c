@@ -186,6 +186,7 @@ static int screen_char_attr = 0;
     void
 redraw_later(int type)
 {
+    printf("drawing");
     redraw_win_later(curwin, type);
 }
 

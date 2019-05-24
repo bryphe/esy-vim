@@ -42,7 +42,7 @@ DEBUG=no
 OPTIMIZE=MAXSPEED
 
 # set to yes to make gvim, no for vim
-GUI=yes
+GUI=no
 
 # set to yes to enable the DLL support (EXPERIMENTAL).
 # Creates vim{32,64}.dll, and stub gvim.exe and vim.exe.
@@ -760,6 +760,8 @@ OBJ = \
 	$(OUTDIR)/winclip.o \
 	$(OUTDIR)/window.o
 
+CORE_OBJ = $(OBJ)
+
 ifeq ($(VIMDLL),yes)
 OBJ += $(OUTDIR)/os_w32dll.o $(OUTDIR)/vimrcd.o
 EXEOBJC = $(OUTDIR)/os_w32exec.o $(OUTDIR)/vimrcc.o
@@ -1000,6 +1002,12 @@ $(VIMEXE): $(OUTDIR) $(EXEOBJC) $(VIMDLLBASE).dll
 else
 $(TARGET): $(OUTDIR) $(OBJ)
 	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
+hello.exe: $(OUTDIR) $(OBJ) 
+	$(CC) -I. -Iproto -L. -Lproto hello.c $(EXELFLAGS) -o $@ $(CORE_OBJ) -lstdc++ -lole32 -lws2_32 -lnetapi32 -lversion -lcomctl32 -luuid -lgdi32
+
+# hello.exe: $(OUTDIR) $(OBJ) 
+# 	$(CC) -I. -Iproto -L. -Lproto hello.c -o $@ -mwindows -lstdc++ -lole32 -lws2_32 -lnetapi32 -lversion -lcomctl32 -luuid
+
 endif
 
 upx: exes
