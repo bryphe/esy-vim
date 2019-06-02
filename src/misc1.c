@@ -1237,6 +1237,7 @@ get_keystroke(void)
     int		save_mapped_ctrl_c = mapped_ctrl_c;
     int		waited = 0;
 
+    printf("get_keystroke: 1 \n");
     mapped_ctrl_c = FALSE;	/* mappings are not used here */
     for (;;)
     {

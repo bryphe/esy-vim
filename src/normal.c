@@ -592,7 +592,10 @@ normal_cmd(
     /*
      * Get the command character from the user.
      */
+    printf("normal_cmd: 1\n");
     c = safe_vgetc();
+    printf("normal_cmd: 2\n");
+    printf("got character: %c\n", c);
     LANGMAP_ADJUST(c, get_real_state() != SELECTMODE);
 
     /*
@@ -605,6 +608,8 @@ normal_cmd(
     else if (old_mapped_len
 		|| (VIsual_active && mapped_len == 0 && typebuf_maplen() > 0))
 	old_mapped_len = typebuf_maplen();
+
+    printf("normal_cmd: 3\n");
 
     if (c == NUL)
 	c = K_ZERO;
@@ -633,6 +638,7 @@ normal_cmd(
 #ifdef FEAT_CMDL_INFO
     need_flushbuf = add_to_showcmd(c);
 #endif
+    printf("normal_cmd: 4\n");
 
 getcount:
     if (!(VIsual_active && VIsual_select))
@@ -669,6 +675,7 @@ getcount:
 		++allow_keys;		/* no mapping for nchar, but keys */
 	    }
 	    ++no_zero_mapping;		/* don't map zero here */
+	    printf("plain_vgetc\n");
 	    c = plain_vgetc();
 	    LANGMAP_ADJUST(c, TRUE);
 	    --no_zero_mapping;
@@ -681,6 +688,7 @@ getcount:
 	    need_flushbuf |= add_to_showcmd(c);
 #endif
 	}
+    printf("normal_cmd: 5\n");
 
 	/*
 	 * If we got CTRL-W there may be a/another count
@@ -735,15 +743,17 @@ getcount:
      */
     ca.opcount = ca.count0;
     ca.count1 = (ca.count0 == 0 ? 1 : ca.count0);
+    printf("normal_cmd: 7\n");
 
 #ifdef FEAT_EVAL
     /*
      * Only set v:count when called from main() and not a stuffed command.
      * Do set it for redo.
      */
-    if (toplevel && readbuf1_empty())
-	set_vcount(ca.count0, ca.count1, set_prevcount);
+    /* if (toplevel && readbuf1_empty()) */
+	/* set_vcount(ca.count0, ca.count1, set_prevcount); */
 #endif
+    printf("normal_cmd: 7.3\n");
 
     /*
      * Find the command character in the table of commands.
@@ -751,14 +761,17 @@ getcount:
      */
     if (ctrl_w)
     {
+    printf("normal_cmd: 7.4.1\n");
 	ca.nchar = c;
 	ca.cmdchar = Ctrl_W;
     }
     else
 	ca.cmdchar = c;
+    printf("normal_cmd: 7.4.2\n");
     idx = find_command(ca.cmdchar);
     if (idx < 0)
     {
+    printf("normal_cmd: 7.4.3\n");
 	/* Not a known command: beep. */
 	clearopbeep(oap);
 	goto normal_end;
@@ -766,13 +779,16 @@ getcount:
 
     if (text_locked() && (nv_cmds[idx].cmd_flags & NV_NCW))
     {
+    printf("normal_cmd: 7.4.4\n");
 	/* This command is not allowed while editing a cmdline: beep. */
 	clearopbeep(oap);
 	text_locked_msg();
+    printf("normal_cmd: 7.4.5\n");
 	goto normal_end;
     }
     if ((nv_cmds[idx].cmd_flags & NV_NCW) && curbuf_locked())
 	goto normal_end;
+    printf("normal_cmd: 7.4.6\n");
 
     /*
      * In Visual/Select mode, a few keys are handled in a special way.
@@ -787,6 +803,7 @@ getcount:
 	    end_visual_mode();
 	    redraw_curbuf_later(INVERTED);
 	}
+    printf("normal_cmd: 7.5\n");
 
 	/* Keys that work different when 'keymodel' contains "startsel" */
 	if (km_startsel)
@@ -807,6 +824,8 @@ getcount:
 		mod_mask &= ~MOD_MASK_SHIFT;
 	}
     }
+
+    printf("normal_cmd: 7.5.1\n");
 
 #ifdef FEAT_RIGHTLEFT
     if (curwin->w_p_rl && KeyTyped && !KeyStuffed
@@ -831,6 +850,7 @@ getcount:
 	idx = find_command(ca.cmdchar);
     }
 #endif
+    printf("normal_cmd: 7.5.2\n");
 
     /*
      * Get an additional character if we need one.
@@ -846,6 +866,7 @@ getcount:
 		|| ((ca.cmdchar == 'a' || ca.cmdchar == 'i')
 		    && (oap->op_type != OP_NOP || VIsual_active))))
     {
+	    printf("normal_cmd: 7.5.2 -> in branch\n");
 	int	*cp;
 	int	repl = FALSE;	/* get character for replace mode */
 	int	lit = FALSE;	/* get extra character literally */
@@ -854,6 +875,7 @@ getcount:
 #ifdef HAVE_INPUT_METHOD
 	int	save_smd;	/* saved value of p_smd */
 #endif
+    printf("normal_cmd: 8\n");
 
 	++no_mapping;
 	++allow_keys;		/* no mapping for nchar, but allow key codes */
@@ -896,6 +918,7 @@ getcount:
 	 */
 	if (cp != NULL)
 	{
+    printf("normal_cmd: 7.5.5\n");
 #ifdef CURSOR_SHAPE
 	    if (repl)
 	    {
@@ -1042,6 +1065,7 @@ getcount:
 	--allow_keys;
     }
 
+    printf("normal_cmd: 7.5.2 - out of branch\n");
 #ifdef FEAT_CMDL_INFO
     /*
      * Flush the showcmd characters onto the screen so we can see them while
@@ -1049,9 +1073,14 @@ getcount:
      * actually displayed, otherwise this will slow down a lot when executing
      * mappings.
      */
-    if (need_flushbuf)
+    printf("normal_cmd: 7.5.2 - flush\n");
+    if (need_flushbuf) {
+    printf("normal_cmd: 7.5.2 - before flush\n");
 	out_flush();
+    printf("normal_cmd: 7.5.2 - after flush\n");
+    }
 #endif
+    printf("normal_cmd: 7.5.2 - after endif\n");
     if (ca.cmdchar != K_IGNORE)
 	did_cursorhold = FALSE;
 
@@ -1091,12 +1120,14 @@ getcount:
 	}
     }
 
+    printf("normal_cmd: 7.5.2 - execute the command\n");
     /*
      * Execute the command!
      * Call the command function found in the commands table.
      */
     ca.arg = nv_cmds[idx].cmd_arg;
     (nv_cmds[idx].cmd_func)(&ca);
+    printf("normal_cmd: 7.5.2 - execute the command - 1\n");
 
     /*
      * If we didn't start or finish an operator, reset oap->regname, unless we
@@ -1106,11 +1137,13 @@ getcount:
 	    && !oap->op_type
 	    && (idx < 0 || !(nv_cmds[idx].cmd_flags & NV_KEEPREG)))
     {
+    printf("normal_cmd: 7.5.2 - execute the command - 2\n");
 	clearop(oap);
 #ifdef FEAT_EVAL
 	{
 	    int regname = 0;
 
+    printf("normal_cmd: 7.5.2 - execute the command - 3\n");
 	    /* Adjust the register according to 'clipboard', so that when
 	     * "unnamed" is present it becomes '*' or '+' instead of '"'. */
 # ifdef FEAT_CLIPBOARD
@@ -1120,6 +1153,7 @@ getcount:
 	}
 #endif
     }
+    printf("normal_cmd: 7.5.2 - execute the command - done\n");
 
     /* Get the length of mapped chars again after typing a count, second
      * character or "z333<cr>". */
@@ -1129,7 +1163,9 @@ getcount:
     /*
      * If an operation is pending, handle it...
      */
+    printf("normal_cmd: do_pending_operator - before\n");
     do_pending_operator(&ca, old_col, FALSE);
+    printf("normal_cmd: do_pending_operator - after\n");
 
     /*
      * Wait for a moment when a message is displayed that will be overwritten
@@ -1143,6 +1179,9 @@ getcount:
      * Also wait a bit after an error message, e.g. for "^O:".
      * Don't redraw the screen, it would remove the message.
      */
+    printf("normal_cmd: wait - before\n");
+    do_pending_operator(&ca, old_col, FALSE);
+    printf("normal_cmd: wait - after\n");
     if (       ((p_smd
 		    && msg_silent == 0
 		    && (restart_edit != 0
@@ -1188,9 +1227,11 @@ getcount:
 	    msg_attr((char *)kmsg, keep_msg_attr);
 	    vim_free(kmsg);
 	}
+    printf("normal_cmd: 7.5.2 - setcursor");
 	setcursor();
 	cursor_on();
 	out_flush();
+	printf("test1");
 	if (msg_scroll || emsg_on_display)
 	    ui_delay(1000L, TRUE);	/* wait at least one second */
 	ui_delay(3000L, FALSE);		/* wait up to three seconds */
@@ -1205,6 +1246,7 @@ getcount:
      */
 normal_end:
 
+    printf("normal_cmd: normal_end\n");
     msg_nowait = FALSE;
 
     /* Reset finish_op, in case it was set */
@@ -8925,22 +8967,28 @@ nv_esc(cmdarg_T *cap)
     static void
 nv_edit(cmdarg_T *cap)
 {
+    printf("nv_edit: 1\n");
     /* <Insert> is equal to "i" */
     if (cap->cmdchar == K_INS || cap->cmdchar == K_KINS)
 	cap->cmdchar = 'i';
 
+
+    printf("nv_edit: 2\n");
     /* in Visual mode "A" and "I" are an operator */
     if (VIsual_active && (cap->cmdchar == 'A' || cap->cmdchar == 'I'))
     {
+    printf("nv_edit: 3\n");
 #ifdef FEAT_TERMINAL
 	if (term_in_normal_mode())
 	{
+    printf("nv_edit: 3.1\n");
 	    end_visual_mode();
 	    clearop(cap->oap);
 	    term_enter_job_mode();
 	    return;
 	}
 #endif
+    printf("nv_edit: 3.2\n");
 	v_visop(cap);
     }
 
@@ -8948,15 +8996,19 @@ nv_edit(cmdarg_T *cap)
     else if ((cap->cmdchar == 'a' || cap->cmdchar == 'i')
 	    && (cap->oap->op_type != OP_NOP || VIsual_active))
     {
+    printf("nv_edit: 4\n");
 #ifdef FEAT_TEXTOBJ
+    printf("nv_edit: 4.1\n");
 	nv_object(cap);
 #else
+    printf("nv_edit: 4.2\n");
 	clearopbeep(cap->oap);
 #endif
     }
 #ifdef FEAT_TERMINAL
     else if (term_in_normal_mode())
     {
+    printf("nv_edit: 5\n");
 	clearop(cap->oap);
 	term_enter_job_mode();
 	return;
@@ -8964,32 +9016,38 @@ nv_edit(cmdarg_T *cap)
 #endif
     else if (!curbuf->b_p_ma && !p_im)
     {
+    printf("nv_edit: 6\n");
 	/* Only give this error when 'insertmode' is off. */
 	emsg(_(e_modifiable));
 	clearop(cap->oap);
 	if (cap->cmdchar == K_PS)
 	    /* drop the pasted text */
 	    bracketed_paste(PASTE_INSERT, TRUE, NULL);
+    printf("nv_edit: 7\n");
     }
     else if (cap->cmdchar == K_PS && VIsual_active)
     {
+    printf("nv_edit: 8\n");
 	pos_T old_pos = curwin->w_cursor;
 	pos_T old_visual = VIsual;
 
 	/* In Visual mode the selected text is deleted. */
 	if (VIsual_mode == 'V' || curwin->w_cursor.lnum != VIsual.lnum)
 	{
+    printf("nv_edit: 9\n");
 	    shift_delete_registers();
 	    cap->oap->regname = '1';
 	}
 	else
 	    cap->oap->regname = '-';
+    printf("nv_edit: 10\n");
 	cap->cmdchar = 'd';
 	cap->nchar = NUL;
 	nv_operator(cap);
 	do_pending_operator(cap, 0, FALSE);
 	cap->cmdchar = K_PS;
 
+    printf("nv_edit: 11\n");
 	/* When the last char in the line was deleted then append. Detect this
 	 * by checking if the cursor moved to before the Visual area. */
 	if (*ml_get_cursor() != NUL && LT_POS(curwin->w_cursor, old_pos)
@@ -9001,6 +9059,7 @@ nv_edit(cmdarg_T *cap)
     }
     else if (!checkclearopq(cap->oap))
     {
+	printf("nv_edit: 12\n");
 	switch (cap->cmdchar)
 	{
 	    case 'A':	/* "A"ppend after the line */
@@ -9057,6 +9116,7 @@ nv_edit(cmdarg_T *cap)
 	    State = save_State;
 	}
 
+	printf("nv_edit: 13\n");
 	invoke_edit(cap, FALSE, cap->cmdchar, FALSE);
     }
     else if (cap->cmdchar == K_PS)
@@ -9074,6 +9134,7 @@ invoke_edit(
     int		cmd,
     int		startln)
 {
+	printf("invoke_edit: 1");
     int		restart_edit_save = 0;
 
     /* Complicated: When the user types "a<C-O>a" we don't want to do Insert
@@ -9087,8 +9148,10 @@ invoke_edit(
     /* Always reset "restart_edit", this is not a restarted edit. */
     restart_edit = 0;
 
+	printf("invoke_edit: 2");
     if (edit(cmd, startln, cap->count1))
 	cap->retval |= CA_COMMAND_BUSY;
+	printf("invoke_edit: 3");
 
     if (restart_edit == 0)
 	restart_edit = restart_edit_save;

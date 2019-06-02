@@ -18,13 +18,25 @@ int main(int argc, char* argv) {
 
     mch_early_init();
     common_init(&params);
-    printf("Hello\n");
+    init_normal_cmds();
+    oparg_T	oa;	/* operator arguments */
+
+
     buf_T* buffer = buflist_new("C:/test.txt", NULL, 1, 0);
     set_curbuf(buffer, 0);
-    ins_bytes("HELLO");
-	close_buffer(NULL, curbuf, 0, FALSE);
+    linenr_T	lnum;
+	    lnum = curwin->w_cursor.lnum;
+    printf("lnum: %d", lnum);
+    char * keys_esc = vim_strsave_escape_csi("iHello<ESC>");
+    ins_typebuf(keys_esc, REMAP_YES, 0, FALSE, FALSE);
+    printf("\nInserted\n", edit);
+    exec_normal(TRUE, FALSE, FALSE);
+    printf ("\nEXECUTED\n");
+	    lnum = curwin->w_cursor.lnum;
+        printf("lnum: %d", lnum);
+    /* ins_bytes("HELLO"); */
 
-    edit_putchar('D', 0);
+    /* edit_putchar('D', 0); */
 
     char* edit = get_last_insert();
     printf("LAST EDIT: %s \n", edit);

@@ -1,6 +1,5 @@
 /* vi:set ts=8 sts=4 sw=4 noet:
- *
- * VIM - Vi IMproved	by Bram Moolenaar
+ * * VIM - Vi IMproved	by Bram Moolenaar
  *
  * Do ":help uganda"  in Vim to read copying and usage conditions.
  * Do ":help credits" in Vim to see a list of people who contributed.
@@ -1809,7 +1808,9 @@ safe_vgetc(void)
 {
     int	c;
 
+    printf("safe_vgetc: 1\n");
     c = vgetc();
+    printf("safe_vgetc: 2\n");
     if (c == NUL)
 	c = get_keystroke();
     return c;

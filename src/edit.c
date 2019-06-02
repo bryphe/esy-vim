@@ -24,7 +24,6 @@
 static int	compl_busy = FALSE;
 #endif /* FEAT_INS_EXPAND */
 
-
 static void ins_ctrl_v(void);
 #ifdef FEAT_JOB_CHANNEL
 static void init_prompt(int cmdchar_todo);
@@ -147,6 +146,7 @@ edit(
     int		startln,	/* if set, insert at start of line */
     long	count)
 {
+	printf("edit: 1");
     int		c = 0;
     char_u	*ptr;
     int		lastc = 0;
@@ -168,6 +168,7 @@ edit(
     int		cmdchar_todo = cmdchar;
 #endif
 
+	printf("edit: 2");
     /* Remember whether editing was restarted after CTRL-O. */
     did_restart_edit = restart_edit;
 
@@ -178,6 +179,7 @@ edit(
     /* set Insstart_orig to Insstart */
     update_Insstart_orig = TRUE;
 
+	printf("edit: 3");
 #ifdef HAVE_SANDBOX
     /* Don't allow inserting in the sandbox. */
     if (sandbox != 0)
@@ -186,6 +188,7 @@ edit(
 	return FALSE;
     }
 #endif
+	printf("edit: 4");
     /* Don't allow changes in the buffer while editing the cmdline.  The
      * caller of getcmdline() may get confused. */
     if (textlock != 0)
@@ -193,6 +196,7 @@ edit(
 	emsg(_(e_secure));
 	return FALSE;
     }
+	printf("edit: 5");
 
 #ifdef FEAT_INS_EXPAND
     /* Don't allow recursive insert mode when busy with completion. */
@@ -203,6 +207,7 @@ edit(
     }
     ins_compl_clear();	    /* clear stuff for CTRL-X mode */
 #endif
+	printf("edit: 6");
 
     /*
      * Trigger InsertEnter autocommands.  Do not do this for "r<CR>" or "grx".
@@ -221,6 +226,7 @@ edit(
 	set_vim_var_string(VV_INSERTMODE, ptr, 1);
 	set_vim_var_string(VV_CHAR, NULL, -1);  /* clear v:char */
 #endif
+	printf("edit: 7");
 	ins_apply_autocmds(EVENT_INSERTENTER);
 
 	/* Make sure the cursor didn't move.  Do call check_cursor_col() in
@@ -325,6 +331,7 @@ edit(
 #ifdef HAVE_INPUT_METHOD
     im_set_active(curbuf->b_p_iminsert == B_IMODE_IM);
 #endif
+	printf("edit: 8");
 
 #ifdef FEAT_MOUSE
     setmouse();
@@ -364,6 +371,7 @@ edit(
 #endif
 	    arrow_used = TRUE;
 	restart_edit = 0;
+	printf("edit: 9");
 
 	/*
 	 * If the cursor was after the end-of-line before the CTRL-O and it is
@@ -410,6 +418,7 @@ edit(
     if (!p_im && did_restart_edit == 0)
 	foldOpenCursor();
 #endif
+	printf("edit: 10");
 
     /*
      * If 'showmode' is set, show the current (insert/replace/..) mode.
@@ -419,6 +428,7 @@ edit(
     i = 0;
     if (p_smd && msg_silent == 0)
 	i = showmode();
+	printf("edit: 12");
 
     if (!p_im && did_restart_edit == 0)
 	change_warning(i == 0 ? 0 : i + 1);
@@ -450,6 +460,7 @@ edit(
      */
     for (;;)
     {
+	    printf("edit - insert main loop: 1");
 #ifdef FEAT_RIGHTLEFT
 	if (!revins_legal)
 	    revins_scol = -1;	    /* reset on illegal motions */
@@ -481,6 +492,7 @@ edit(
 	 * menu invoked a shell command). */
 	if (stuff_empty())
 	{
+	    printf("edit - insert main loop: 1.1");
 	    did_check_timestamps = FALSE;
 	    if (need_check_timestamps)
 		check_timestamps(FALSE);
@@ -490,6 +502,7 @@ edit(
 	 * When emsg() was called msg_scroll will have been set.
 	 */
 	msg_scroll = FALSE;
+	    printf("edit - insert main loop: 1.2");
 
 #ifdef FEAT_GUI
 	/* When 'mousefocus' is set a mouse movement may have taken us to
@@ -498,6 +511,7 @@ edit(
 	if (need_mouse_correct)
 	    gui_mouse_correct();
 #endif
+	    printf("edit - insert main loop: 1.3");
 
 #ifdef FEAT_FOLDING
 	/* Open fold at the cursor line, according to 'foldopen'. */
@@ -516,6 +530,7 @@ edit(
 	}
 #endif
 
+	    printf("edit - insert main loop: 1.4");
 	/*
 	 * If we inserted a character at the last position of the last line in
 	 * the window, scroll the window one line up. This avoids an extra
@@ -579,6 +594,7 @@ edit(
 	 * Also shows mode, ruler and positions cursor.
 	 */
 	ins_redraw(TRUE);
+	printf("edit: 594");
 
 	if (curwin->w_p_scb)
 	    do_check_scrollbind(TRUE);
@@ -590,6 +606,7 @@ edit(
 #ifdef FEAT_DIFF
 	old_topfill = curwin->w_topfill;
 #endif
+	    printf("edit - insert main loop: 2");
 
 #ifdef USE_ON_FLY_SCROLL
 	dont_scroll = FALSE;		/* allow scrolling here */
@@ -612,7 +629,10 @@ edit(
 	else
 	    do
 	    {
-		c = safe_vgetc();
+		       printf("edit - insert DO loop: 1");
+			c = safe_vgetc();
+		       printf("edit - insert DO loop: 2");
+		       /* printf("Character from vgetc: %s", c); */
 
 		if (stop_insert_mode)
 		{
