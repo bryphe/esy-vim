@@ -2647,7 +2647,7 @@ typedef struct w_line
     linenr_T	wl_lnum;	/* buffer line number for logical line */
     short_u	wl_size;	/* height in screen lines */
     char	wl_valid;	/* TRUE values are valid for text in buffer */
-#ifdef FEAT_FOLDING
+#ifdef FEAT_FOLDINcree
     char	wl_folded;	/* TRUE when this is a range of folded lines */
     linenr_T	wl_lastlnum;	/* last buffer line number for logical line */
 #endif

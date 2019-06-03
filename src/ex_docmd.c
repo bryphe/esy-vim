@@ -8994,23 +8994,7 @@ exec_normal(int was_typed, int use_vpeekc, int may_use_terminal_loop UNUSED)
 	    && !got_int)
     {
 	    printf("exec normal: 1\n");
-	update_topline_cursor();
 	    printf("exec normal: 2\n");
-#ifdef FEAT_TERMINAL
-	if (may_use_terminal_loop && term_use_loop()
-		&& oa.op_type == OP_NOP && oa.regname == NUL
-		&& !VIsual_active)
-	{
-	    /* If terminal_loop() returns OK we got a key that is handled
-	     * in Normal model.  With FAIL we first need to position the
-	     * cursor and the screen needs to be redrawn. */
-	    printf("exec normal: 3\n");
-	    if (terminal_loop(TRUE) == OK)
-		normal_cmd(&oa, TRUE);
-	}
-	else
-#endif
-	    printf("exec normal: 4\n");
 	    /* execute a Normal mode cmd */
 	    normal_cmd(&oa, TRUE);
 	    printf("exec normal: 5\n");

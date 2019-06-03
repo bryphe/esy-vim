@@ -460,7 +460,8 @@ edit(
      */
     for (;;)
     {
-	    printf("edit - insert main loop: 1");
+	    printf("edit - insert main loop: 1\n");
+		      printf("TYPEBUF LENGTH: %d\n", typebuf.tb_len);
 #ifdef FEAT_RIGHTLEFT
 	if (!revins_legal)
 	    revins_scol = -1;	    /* reset on illegal motions */
@@ -629,10 +630,11 @@ edit(
 	else
 	    do
 	    {
-		       printf("edit - insert DO loop: 1");
+		      printf("TYPEBUF LENGTH: %d\n", typebuf.tb_len);
+		       printf("edit - insert DO loop: 1\n");
 			c = safe_vgetc();
-		       printf("edit - insert DO loop: 2");
-		       /* printf("Character from vgetc: %s", c); */
+		       printf("edit - insert DOO loop: 2\n");
+		    printf("got character: %c\n", c);
 
 		if (stop_insert_mode)
 		{
@@ -649,78 +651,6 @@ edit(
 #ifdef FEAT_RIGHTLEFT
 	if (p_hkmap && KeyTyped)
 	    c = hkmap(c);		/* Hebrew mode mapping */
-#endif
-
-#ifdef FEAT_INS_EXPAND
-	/*
-	 * Special handling of keys while the popup menu is visible or wanted
-	 * and the cursor is still in the completed word.  Only when there is
-	 * a match, skip this when no matches were found.
-	 */
-	if (ins_compl_active()
-		&& pum_wanted()
-		&& curwin->w_cursor.col >= ins_compl_col()
-		&& ins_compl_has_shown_match())
-	{
-	    /* BS: Delete one character from "compl_leader". */
-	    if ((c == K_BS || c == Ctrl_H)
-			&& curwin->w_cursor.col > ins_compl_col()
-			&& (c = ins_compl_bs()) == NUL)
-		continue;
-
-	    /* When no match was selected or it was edited. */
-	    if (!ins_compl_used_match())
-	    {
-		/* CTRL-L: Add one character from the current match to
-		 * "compl_leader".  Except when at the original match and
-		 * there is nothing to add, CTRL-L works like CTRL-P then. */
-		if (c == Ctrl_L
-			&& (!ctrl_x_mode_line_or_eval()
-			    || ins_compl_long_shown_match()))
-		{
-		    ins_compl_addfrommatch();
-		    continue;
-		}
-
-		/* A non-white character that fits in with the current
-		 * completion: Add to "compl_leader". */
-		if (ins_compl_accept_char(c))
-		{
-#if defined(FEAT_EVAL)
-		    /* Trigger InsertCharPre. */
-		    char_u *str = do_insert_char_pre(c);
-		    char_u *p;
-
-		    if (str != NULL)
-		    {
-			for (p = str; *p != NUL; MB_PTR_ADV(p))
-			    ins_compl_addleader(PTR2CHAR(p));
-			vim_free(str);
-		    }
-		    else
-#endif
-			ins_compl_addleader(c);
-		    continue;
-		}
-
-		/* Pressing CTRL-Y selects the current match.  When
-		 * ins_compl_enter_selects() is set the Enter key does the
-		 * same. */
-		if ((c == Ctrl_Y || (ins_compl_enter_selects()
-				    && (c == CAR || c == K_KENTER || c == NL)))
-			&& stop_arrow() == OK)
-		{
-		    ins_compl_delete();
-		    ins_compl_insert(FALSE);
-		}
-	    }
-	}
-
-	/* Prepare for or stop CTRL-X mode.  This doesn't do completion, but
-	 * it does fix up the text when finishing completion. */
-	ins_compl_init_get_longest();
-	if (ins_compl_prep(c))
-	    continue;
 #endif
 
 	/* CTRL-\ CTRL-N goes to Normal mode,
@@ -756,14 +686,14 @@ edit(
 	    }
 	}
 
+	if (c == 'Z') {
+	    goto doESCkey;
+	}
+
 #ifdef FEAT_DIGRAPHS
 	c = do_digraph(c);
 #endif
 
-#ifdef FEAT_INS_EXPAND
-	if ((c == Ctrl_V || c == Ctrl_Q) && ctrl_x_mode_cmdline())
-	    goto docomplete;
-#endif
 	if (c == Ctrl_V || c == Ctrl_Q)
 	{
 	    ins_ctrl_v();
@@ -856,6 +786,7 @@ do_intr:
 	    {
 		if (got_int)
 		{
+	printf("edit.c - vgetc\n");
 		    (void)vgetc();		/* flush all buffers */
 		    got_int = FALSE;
 		}
@@ -1357,6 +1288,9 @@ normalchar:
 		char_u *str = do_insert_char_pre(c);
 		char_u *p;
 
+		printf("edit.c -> Inserting char in edit. Typebuf length: %d\n", typebuf.tb_len);
+		printf("--str: %s\n", str);
+
 		if (str != NULL)
 		{
 		    if (*str != NUL && stop_arrow() != FAIL)
@@ -1408,7 +1342,12 @@ normalchar:
 				(has_mbyte && c >= 0x100) ? (c + ABBR_OFF) : c)
 			&& c != Ctrl_RSB))
 	    {
-		insert_special(c, FALSE, FALSE);
+	  printf("insert_special start\n");
+		  printf("TYPEBUF LENGTH: %d\n", typebuf.tb_len);
+		  ins_char(c);
+		/* insert_special(c, FALSE, FALSE); */
+	  printf("insert_special end\n");
+		  printf("TYPEBUF LENGTH: %d\n", typebuf.tb_len);
 #ifdef FEAT_RIGHTLEFT
 		revins_legal++;
 		revins_chars++;
@@ -1458,6 +1397,8 @@ force_cindent:
 	}
 #endif /* FEAT_CINDENT */
 
+		      printf("TYPEBUF LENGTH: %d\n", typebuf.tb_len);
+	printf("edit - insert mode done\n");
     }	/* for (;;) */
     /* NOTREACHED */
 }
@@ -6425,6 +6366,7 @@ get_nolist_virtcol(void)
     static char_u *
 do_insert_char_pre(int c)
 {
+    printf("do_insert_char_pre - character: %c\n", c);
     char_u	*res;
     char_u	buf[MB_MAXBYTES + 1];
     int		save_State = State;

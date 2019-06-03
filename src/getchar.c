@@ -1133,6 +1133,7 @@ typebuf_maplen(void)
 del_typebuf(int len, int offset)
 {
     int	    i;
+    printf("del_typebuf\n");
 
     if (len == 0)
 	return;		/* nothing to do */
@@ -1307,6 +1308,7 @@ alloc_typebuf(void)
     void
 free_typebuf(void)
 {
+    printf("free_typebuf\n");
     if (typebuf.tb_buf == typebuf_init)
 	internal_error("Free typebuf 1");
     else
@@ -1326,6 +1328,7 @@ static typebuf_T saved_typebuf[NSCRIPT];
     int
 save_typebuf(void)
 {
+    printf("!!save_typebuf\n");
     init_typebuf();
     saved_typebuf[curscript] = typebuf;
     /* If out of memory: restore typebuf and close file. */
@@ -1350,6 +1353,7 @@ static int old_mouse_col;	/* mouse_col related to old_char */
     void
 save_typeahead(tasave_T *tp)
 {
+    printf("!!save_typeahead\n");
     tp->save_typebuf = typebuf;
     tp->typebuf_valid = (alloc_typebuf() == OK);
     if (!tp->typebuf_valid)
@@ -1593,7 +1597,9 @@ vgetc(void)
 		++allow_keys;
 		did_inc = TRUE;	// mod_mask may change value
 	    }
+	    printf("getchar.c: vgetorpeek called at 1596\n");
 	    c = vgetorpeek(TRUE);
+	    printf("getchar.c: vgetorpeek call complete at 1596\n");
 	    if (did_inc)
 	    {
 		--no_mapping;
@@ -1622,60 +1628,6 @@ vgetc(void)
 		}
 		c = TO_SPECIAL(c2, c);
 
-#if defined(FEAT_GUI_MSWIN) && defined(FEAT_MENU) && defined(FEAT_TEAROFF)
-		// Handle K_TEAROFF here, the caller of vgetc() doesn't need to
-		// know that a menu was torn off
-		if (
-# ifdef VIMDLL
-		    gui.in_use &&
-# endif
-		    c == K_TEAROFF)
-		{
-		    char_u	name[200];
-		    int		i;
-
-		    // get menu path, it ends with a <CR>
-		    for (i = 0; (c = vgetorpeek(TRUE)) != '\r'; )
-		    {
-			name[i] = c;
-			if (i < 199)
-			    ++i;
-		    }
-		    name[i] = NUL;
-		    gui_make_tearoff(name);
-		    continue;
-		}
-#endif
-#if defined(FEAT_GUI) && defined(FEAT_GUI_GTK) && defined(FEAT_MENU)
-		// GTK: <F10> normally selects the menu, but it's passed until
-		// here to allow mapping it.  Intercept and invoke the GTK
-		// behavior if it's not mapped.
-		if (c == K_F10 && gui.menubar != NULL)
-		{
-		    gtk_menu_shell_select_first(
-					   GTK_MENU_SHELL(gui.menubar), FALSE);
-		    continue;
-		}
-#endif
-#ifdef FEAT_GUI
-		if (gui.in_use)
-		{
-		    // Handle focus event here, so that the caller doesn't
-		    // need to know about it.  Return K_IGNORE so that we loop
-		    // once (needed if 'lazyredraw' is set).
-		    if (c == K_FOCUSGAINED || c == K_FOCUSLOST)
-		    {
-			ui_focus_change(c == K_FOCUSGAINED);
-			c = K_IGNORE;
-		    }
-
-		    // Translate K_CSI to CSI.  The special key is only used
-		    // to avoid it being recognized as the start of a special
-		    // key.
-		    if (c == K_CSI)
-			c = CSI;
-		}
-#endif
 	    }
 	    // a keypad or special function key was not mapped, use it like
 	    // its ASCII equivalent
@@ -1808,11 +1760,14 @@ safe_vgetc(void)
 {
     int	c;
 
+		      printf("TYPEBUF length: %i\n", typebuf.tb_len);
     printf("safe_vgetc: 1\n");
     c = vgetc();
     printf("safe_vgetc: 2\n");
-    if (c == NUL)
+    if (c == NUL) {
+    printf("safe_vgetc: get_keystroke?\n");
 	c = get_keystroke();
+    }
     return c;
 }
 
@@ -1950,6 +1905,7 @@ vungetc(int c)
     static int
 vgetorpeek(int advance)
 {
+    printf("vgetorpeek: 1\n");
     int		c, c1;
     int		keylen;
     char_u	*s;
@@ -2002,6 +1958,7 @@ vgetorpeek(int advance)
     ++vgetc_busy;
 
     if (advance)
+	    printf("vgetorpeek - advance is true\n");
 	KeyStuffed = FALSE;
 
     init_typebuf();
@@ -2592,6 +2549,7 @@ vgetorpeek(int advance)
 		    }
 		}
 
+    printf("vgetorpeek: 3\n");
 /*
  * get a character: 3. from the user - handle <Esc> in Insert mode
  */

@@ -27,21 +27,35 @@ int main(int argc, char* argv) {
     linenr_T	lnum;
 	    lnum = curwin->w_cursor.lnum;
     printf("lnum: %d", lnum);
-    char * keys_esc = vim_strsave_escape_csi("iHello<ESC>");
+    
+    char * keys_esc = vim_strsave_escape_csi("ggGddowxyz\033I123\015\033");
+
     ins_typebuf(keys_esc, REMAP_YES, 0, FALSE, FALSE);
+		      printf("TYPEBUF: %s\n", typebuf.tb_buf);
     printf("\nInserted\n", edit);
     exec_normal(TRUE, FALSE, FALSE);
     printf ("\nEXECUTED\n");
-	    lnum = curwin->w_cursor.lnum;
-        printf("lnum: %d", lnum);
     /* ins_bytes("HELLO"); */
 
+
     /* edit_putchar('D', 0); */
+    char * keys2= vim_strsave_escape_csi(":help tutor\015");
+    ins_typebuf(keys2, REMAP_YES, 0, FALSE, FALSE);
+    /* ins_typebuf(keys2, REMAP_YES, 0, FALSE, FALSE); */
+    printf("\nInserted\n", edit);
+
+    win_setheight(100);
+    win_setwidth(100);
+
+    exec_normal(TRUE, FALSE, FALSE);
 
     char* edit = get_last_insert();
     printf("LAST EDIT: %s \n", edit);
 
-    char *line = ml_get(0);
+	    lnum = curwin->w_cursor.lnum;
+        printf("lnum: %d", lnum);
+
+    char *line = ml_get(3);
     printf("LINE: %s\n", line);
 
     printf("Done!\n");

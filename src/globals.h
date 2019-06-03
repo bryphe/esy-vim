@@ -1299,7 +1299,7 @@ EXTERN int	echo_wid_arg INIT(= FALSE);	/* --echo-wid argument */
 
 #ifdef FEAT_GUI_MSWIN
 /*
- * The value of the --windowid argument.
+ * The value of the --windowid argument.*
  * For embedding gvim inside another application.
  */
 EXTERN long_u	win_socket_id INIT(= 0);
